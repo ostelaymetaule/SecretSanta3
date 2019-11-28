@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SecretSanta.Bot.Repository;
 using SecretSanta.Bot.Helpers;
+using Microsoft.OpenApi.Models;
 
 namespace SecretSanta3
 {
@@ -34,21 +35,22 @@ namespace SecretSanta3
 
             var basepath2 = Directory.GetCurrentDirectory();
             var basepath = Environment.GetEnvironmentVariable("basepath") ?? basepath2;
-            
+
             var messagesFilePath = Path.Combine(basepath, "SecretSanta", "secretSanta.json");
             var userInfosFilePath = Path.Combine(basepath, "SecretSanta", "secretSantaUserInfos.json");
 
             IFileRepository rep = new SimpleJsonRepository(messagesFilePath, userInfosFilePath);
             services.AddSingleton<IFileRepository>(rep);
-            var token = Environment.GetEnvironmentVariable("bottoken");
+
+            var token = Environment.GetEnvironmentVariable("bottoken"); //TODO: not forget insert bot token
             var tgClient = new Telegram.Bot.TelegramBotClient(token);
             var botCaller = new BotCaller(rep, tgClient);
             services.AddSingleton(tgClient);
 
             services.AddSingleton(botCaller);
 
-            var issuer = Environment.GetEnvironmentVariable("issuer");
-            var jwtToken = Environment.GetEnvironmentVariable("token");
+            var issuer = Environment.GetEnvironmentVariable("issuer") ?? "test";
+            var jwtToken = Environment.GetEnvironmentVariable("token") ?? "mystoke3290841298ß3745908213745n";
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
               .AddJwtBearer(cfg =>
               {
@@ -63,10 +65,12 @@ namespace SecretSanta3
                   };
               });
 
-
-
-
             services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +80,16 @@ namespace SecretSanta3
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                //c.RoutePrefix = string.Empty;
+                //important: the path is fucked up 
+                c.SwaggerEndpoint("./v1/swagger.json", "My API V1");
+                //string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
+                //c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "My API");
+            });
 
             app.UseHttpsRedirection();
 
@@ -87,6 +101,7 @@ namespace SecretSanta3
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }

@@ -15,8 +15,9 @@ namespace SecretSanta.Bot.Controllers
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Produces("application/json")]
-    //[Route("api/SecretSanta")]
-    public class SecretSantaController : Controller
+    [ApiController]
+    //[Route("api/[controller]")]
+    public class SecretSantaController : ControllerBase
     {
         private IConfiguration _configuration;
         private IWebHostEnvironment _env;
@@ -49,7 +50,7 @@ namespace SecretSanta.Bot.Controllers
             return _rep.GetUserInfos().Count();
         }
         // Post: api/SecretSanta
-        [HttpPost]
+        [HttpPost("api/SecretSanta")]
         public List<UserSantaInfos> Post([FromBody]List<UserSantaInfos> userInfos)
         {
             _rep.SaveUserInfosToFile(userInfos);

@@ -19,12 +19,11 @@ namespace SecretSanta.Bot.Helpers
         private const string SEND_FEEDBACK = "/Передать Внучку";
         private const string SEND_FEEDBACK_TO_SANTA = "/Написать Санте";
 
-        private string _botToken;
         private Telegram.Bot.TelegramBotClient _client;
 
         public BotCaller(IFileRepository rep, Telegram.Bot.TelegramBotClient client)
         {
-            this._botToken = Environment.GetEnvironmentVariable("bottoken");
+
             _rep = rep;
             _rep.GetUserInfos().ForEach(x => System.Console.WriteLine($"{x.UserName}:\n my secret santa is {x.MySecretSanta},\n and i am secret santa for: {x.IAmSecretSantaForUser}\n\n"));
             _client = client;
