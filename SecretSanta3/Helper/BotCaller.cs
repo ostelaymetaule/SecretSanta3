@@ -151,7 +151,7 @@ namespace SecretSanta.Bot.Helpers
 
         private async void AskButtonWithCallBack(long chatId, string qustionText, List<string> options)
         {
-            var keyboard = new InlineKeyboardMarkup(options.Select(x => new[] { new InlineKeyboardButton() { Text = x, SwitchInlineQueryCurrentChat = x } }).ToArray());
+            var keyboard = new InlineKeyboardMarkup(options.Select(x => new[] { new InlineKeyboardButton() { Text = x, CallbackData = x } }).ToArray());
 
             await _client.SendTextMessageAsync(chatId, qustionText,
                 replyMarkup: keyboard);
@@ -216,7 +216,7 @@ namespace SecretSanta.Bot.Helpers
                 ADDRESS,
                 //SEND_FEEDBACK,
                 //SEND_FEEDBACK_TO_SANTA,
-                //CAN_SEND_TO,
+                CAN_SEND_TO,
                 LOVE_TO_RECEIVE,
                 DO_NOT_LOVE_TO_RECEIVE,
                 SHOW_INFO

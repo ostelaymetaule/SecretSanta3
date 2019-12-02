@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/SecretSanta3/SecretSanta/secretSantaUserInfos.json
+/SecretSanta3/SecretSanta/secretSanta.json
