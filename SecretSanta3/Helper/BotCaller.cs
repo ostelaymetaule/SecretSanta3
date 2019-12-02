@@ -214,9 +214,14 @@ namespace SecretSanta.Bot.Helpers
 
             AskButton(e.Message.Chat.Id, "Заполни анкету, %юзернейм%", new List<string>() {
                 ADDRESS,
-                SHOW_INFO,
-                SEND_FEEDBACK,
-                SEND_FEEDBACK_TO_SANTA });
+                //SEND_FEEDBACK,
+                //SEND_FEEDBACK_TO_SANTA,
+                CAN_SEND_TO,
+                LOVE_TO_RECEIVE,
+                DO_NOT_LOVE_TO_RECEIVE,
+                SHOW_INFO
+
+            });
 
             switch (e.Message.Text)
             {
