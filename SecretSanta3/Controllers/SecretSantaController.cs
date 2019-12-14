@@ -87,7 +87,7 @@ namespace SecretSanta.Bot.Controllers
             //SendSecretSantaMatchAsync
             System.Console.WriteLine(test);
 
-            return await _botCaller.SendNotification2Async();
+            return await _botCaller.SendNotificationAsync();
 
         }
 

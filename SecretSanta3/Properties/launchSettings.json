@@ -19,8 +19,7 @@
       "environmentVariables": {
         "bottoken": "-",
         "issuer": "cloud.yellowwardrobe.com",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "token": "dspofkjsdoifj98023rusdiuhnfiuw"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "SecretSanta3": {

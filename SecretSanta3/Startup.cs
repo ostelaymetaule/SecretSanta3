@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using SecretSanta.Bot.Repository;
 using SecretSanta.Bot.Helpers;
 using Microsoft.OpenApi.Models;
+using SecretSanta3.Extensions;
 
 namespace SecretSanta3
 {
@@ -42,33 +43,49 @@ namespace SecretSanta3
             IFileRepository rep = new SimpleJsonRepository(messagesFilePath, userInfosFilePath);
             services.AddSingleton<IFileRepository>(rep);
 
-            var token = Environment.GetEnvironmentVariable("bottoken"); //TODO: not forget insert bot token
+            var token =  Environment.GetEnvironmentVariable("bottoken"); //TODO: not forget insert bot token
             var tgClient = new Telegram.Bot.TelegramBotClient(token);
             var botCaller = new BotCaller(rep, tgClient);
             services.AddSingleton(tgClient);
 
             services.AddSingleton(botCaller);
 
-            var issuer = Environment.GetEnvironmentVariable("issuer") ?? "test";
-            var jwtToken = Environment.GetEnvironmentVariable("token") ?? "mystoke3290841298ß3745908213745n";
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-              .AddJwtBearer(cfg =>
-              {
-                  cfg.RequireHttpsMetadata = false;
-                  cfg.SaveToken = true;
+            var issuer = Environment.GetEnvironmentVariable("issuer") ?? "cloud.yellowwardrobe.com";
+            var jwtToken = Environment.GetEnvironmentVariable("token") ?? "fghsrfsh5e6hfg";
+            var key = Encoding.ASCII.GetBytes(jwtToken);
 
-                  cfg.TokenValidationParameters = new TokenValidationParameters()
-                  {
-                      ValidIssuer = issuer,
-                      ValidAudience = issuer,
-                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtToken))
-                  };
-              });
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Secretsanta Api", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Description = "Authorization header using the Bearer scheme",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header
+                });
+
+                c.DocumentFilter<SwaggerSecurityRequirementsDocumentFilter>();
+
             });
 
         }
@@ -86,9 +103,10 @@ namespace SecretSanta3
             {
                 //c.RoutePrefix = string.Empty;
                 //important: the path is fucked up 
-                c.SwaggerEndpoint("./v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("./v1/swagger.json", "Secretsanta Api V1");
                 //string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
                 //c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "My API");
+
             });
 
             app.UseHttpsRedirection();
