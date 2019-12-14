@@ -214,8 +214,8 @@ namespace SecretSanta.Bot.Helpers
 
             AskButton(e.Message.Chat.Id, "sup, %юзернейм%", new List<string>() {
                // ADDRESS,
-                SEND_FEEDBACK,
-                SEND_FEEDBACK_TO_SANTA,
+               // SEND_FEEDBACK,
+               // SEND_FEEDBACK_TO_SANTA,
                // CAN_SEND_TO,
                // LOVE_TO_RECEIVE,
                // DO_NOT_LOVE_TO_RECEIVE,
