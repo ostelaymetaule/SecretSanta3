@@ -90,7 +90,15 @@ namespace SecretSanta.Bot.Controllers
             return await _botCaller.SendNotificationAsync();
 
         }
+        [HttpPost("api/SecretSanta/SendGeneralNotification")]
+        public async Task<bool> SendGeneralNotification([FromBody] string text)
+        {
+            //SendSecretSantaMatchAsync
+            System.Console.WriteLine(text);
 
+            return await _botCaller.SendGeneralNotificationAsync(text);
+
+        }
 
         // GET: api/SecretSanta/5
         [HttpGet("api/SecretSanta/{userName}", Name = "Get")]

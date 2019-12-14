@@ -100,7 +100,7 @@ namespace SecretSanta.Bot.Helpers
 
             var notMatchedSantas = _rep.GetUserInfos().Where(x => !String.IsNullOrEmpty(x.PostAddress)).ToList();
             var santasWithMatch = new List<UserSantaInfos>();
-            Random r = new Random((int)DateTime.Now.Ticks);
+            Random r = new Random();
             var restTargetCount = notMatchedSantas.Count;
             var firstSanta = notMatchedSantas[r.Next(restTargetCount)];
             var santa = firstSanta;
@@ -212,13 +212,13 @@ namespace SecretSanta.Bot.Helpers
 
             var userInfo = _rep.GetUserInfos().FirstOrDefault(x => x.UserName == e.Message.Chat.Username) ?? new UserSantaInfos() { ChatId = e.Message.Chat.Id, UserName = e.Message.Chat.Username };
 
-            AskButton(e.Message.Chat.Id, "Заполни анкету, %юзернейм%", new List<string>() {
-                ADDRESS,
-                //SEND_FEEDBACK,
-                //SEND_FEEDBACK_TO_SANTA,
-                CAN_SEND_TO,
-                LOVE_TO_RECEIVE,
-                DO_NOT_LOVE_TO_RECEIVE,
+            AskButton(e.Message.Chat.Id, "sup, %юзернейм%", new List<string>() {
+               // ADDRESS,
+                SEND_FEEDBACK,
+                SEND_FEEDBACK_TO_SANTA,
+               // CAN_SEND_TO,
+               // LOVE_TO_RECEIVE,
+               // DO_NOT_LOVE_TO_RECEIVE,
                 SHOW_INFO
 
             });
@@ -365,7 +365,17 @@ namespace SecretSanta.Bot.Helpers
         }
 
         private IFileRepository _rep;
+        public async Task<bool> SendGeneralNotificationAsync(string text)
+        {
+            var userInfos = _rep.GetUserInfos();
+            foreach (var infoUser in userInfos)
+            {
 
+                await _client.SendTextMessageAsync(infoUser.ChatId, text);
+
+            }
+            return true;
+        }
 
         public async Task<bool> SendNotificationAsync()
         {
@@ -376,7 +386,7 @@ namespace SecretSanta.Bot.Helpers
                 {
                     if (String.IsNullOrEmpty(infoUser.PostAddress))
                     {
-                        await _client.SendTextMessageAsync(infoUser.ChatId, "Привет! Мы заканчиваем прием заявок. Ты не указал адрес и ФИО куда подарок слать. До 16.12.19 можешь передумать и заполнить анкету. Иначе при распределении дедов морозов твоя заявка учитываться не будет.");
+                        //await _client.SendTextMessageAsync(infoUser.ChatId, "Привет! Мы заканчиваем прием заявок. Ты не указал адрес и ФИО куда подарок слать. До 16.12.19 можешь передумать и заполнить анкету. Иначе при распределении дедов морозов твоя заявка учитываться не будет.");
                     }
                     else
                     {
