@@ -214,8 +214,8 @@ namespace SecretSanta.Bot.Helpers
 
             AskButton(e.Message.Chat.Id, "sup, %юзернейм%", new List<string>() {
                // ADDRESS,
-               // SEND_FEEDBACK,
-               // SEND_FEEDBACK_TO_SANTA,
+                SEND_FEEDBACK,
+                SEND_FEEDBACK_TO_SANTA,
                // CAN_SEND_TO,
                // LOVE_TO_RECEIVE,
                // DO_NOT_LOVE_TO_RECEIVE,
@@ -285,38 +285,54 @@ namespace SecretSanta.Bot.Helpers
                         await _client.SendTextMessageAsync(e.Message.Chat.Id, "Записал что не нравится.");
                         break;
                     case SEND_FEEDBACK:
-
-                        var grandChild = _rep.GetUserInfos().FirstOrDefault(x => x.UserName == userInfo.IAmSecretSantaForUser);
-                        if (grandChild == null)
+                        try
                         {
-                            grandChild = _rep.GetUserInfos().FirstOrDefault(x => x.MySecretSanta == userInfo.UserName);
+                            var grandChild = _rep.GetUserInfos().FirstOrDefault(x => x.UserName == userInfo?.IAmSecretSantaForUser);
                             if (grandChild == null)
                             {
-                                await SendLogToLorinAsync(userInfo, "Не нашел внучка в базе");
-                                break;
+                                grandChild = _rep.GetUserInfos().FirstOrDefault(x => x.MySecretSanta == userInfo?.UserName);
+                                if (grandChild == null)
+                                {
+                                    await _client.SendTextMessageAsync(e.Message.Chat.Id, "Не нашел внучка в базе");
+                                    break;
+                                }
                             }
+                            await _client.SendTextMessageAsync(grandChild.ChatId, "Твой дед-анон пишет тебе:");
+                            await _client.SendTextMessageAsync(grandChild.ChatId, "```" + e.Message.Text + "```");
                         }
-                        await _client.SendTextMessageAsync(grandChild.ChatId, "Твой дед-анон пишет тебе:");
-                        await _client.SendTextMessageAsync(grandChild.ChatId, "```" + e.Message.Text + "```");
+                        catch (Exception ex)
+                        {
+
+                        }
+
                         //await SendLogToLorinAsync(userInfo, "отправил своему внучку сообщение");
 
                         break;
                     case SEND_FEEDBACK_TO_SANTA:
-
-                        var mySanta = _rep.GetUserInfos().FirstOrDefault(x => x.UserName == userInfo.MySecretSanta);
-
-                        if (mySanta == null)
+                        try
                         {
-                            mySanta = _rep.GetUserInfos().FirstOrDefault(x => x.IAmSecretSantaForUser == userInfo.UserName);
+                            var mySanta = _rep.GetUserInfos().FirstOrDefault(x => x.UserName == userInfo.MySecretSanta);
+
                             if (mySanta == null)
                             {
-                                await SendLogToLorinAsync(userInfo, "Не нашел санту в базе");
-                                break;
+                                mySanta = _rep.GetUserInfos().FirstOrDefault(x => x.IAmSecretSantaForUser == userInfo.UserName);
+                                if (mySanta == null)
+                                {
+                                    await _client.SendTextMessageAsync(e.Message.Chat.Id, "Не нашел санту в базе");
+
+                                    break;
+                                }
+
                             }
+                            await _client.SendTextMessageAsync(mySanta.ChatId, "Твой внук пишет тебе:");
+                            await _client.SendTextMessageAsync(mySanta.ChatId, "```" + e.Message.Text + "```");
+                        }
+                        catch (Exception ex)
+                        {
+
 
                         }
-                        await _client.SendTextMessageAsync(mySanta.ChatId, "Твой внук пишет тебе:");
-                        await _client.SendTextMessageAsync(mySanta.ChatId, "```" + e.Message.Text + "```");
+
                         //await SendLogToLorinAsync(userInfo, "отправил своему санте сообщение");
 
                         break;
