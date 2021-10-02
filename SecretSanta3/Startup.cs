@@ -51,7 +51,7 @@ namespace SecretSanta3
             services.AddSingleton(botCaller);
 
             var issuer = Environment.GetEnvironmentVariable("issuer") ?? "cloud.yellowwardrobe.com";
-            var jwtToken = Environment.GetEnvironmentVariable("token") ?? "fghsrfsh5e6hfg";
+            var jwtToken = Environment.GetEnvironmentVariable("token") ?? "-";
             var key = Encoding.ASCII.GetBytes(jwtToken);
 
             services.AddAuthentication(x =>

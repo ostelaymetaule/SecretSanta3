@@ -211,17 +211,33 @@ namespace SecretSanta.Bot.Helpers
             } });
 
             var userInfo = _rep.GetUserInfos().FirstOrDefault(x => x.UserName == e.Message.Chat.Username) ?? new UserSantaInfos() { ChatId = e.Message.Chat.Id, UserName = e.Message.Chat.Username };
-
-            AskButton(e.Message.Chat.Id, "sup, %юзернейм%", new List<string>() {
-               // ADDRESS,
+            if (userInfo.NotificationSent)
+            {
+                AskButton(e.Message.Chat.Id, "sup, %юзернейм%", new List<string>() {
+                //ADDRESS,
                 SEND_FEEDBACK,
                 SEND_FEEDBACK_TO_SANTA,
-               // CAN_SEND_TO,
-               // LOVE_TO_RECEIVE,
-               // DO_NOT_LOVE_TO_RECEIVE,
+                //CAN_SEND_TO,
+                //LOVE_TO_RECEIVE,
+                //DO_NOT_LOVE_TO_RECEIVE,
                 SHOW_INFO
 
             });
+            }
+            else
+            {
+                AskButton(e.Message.Chat.Id, "sup, %юзернейм%", new List<string>() {
+                ADDRESS,
+               // SEND_FEEDBACK,
+               // SEND_FEEDBACK_TO_SANTA,
+                CAN_SEND_TO,
+                LOVE_TO_RECEIVE,
+                DO_NOT_LOVE_TO_RECEIVE,
+                SHOW_INFO
+
+            });
+            }
+
 
             switch (e.Message.Text)
             {
