@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,7 +43,7 @@ public class ContainerConfiguration
         // to add them to Autofac.
         containerBuilder.Populate(serviceCollection);
 
-    
+
 
         // Make your Autofac registrations. Order is important!
         // If you make them BEFORE you call Populate, then the
@@ -54,7 +55,7 @@ public class ContainerConfiguration
 
         // Build configuration
         IConfigurationRoot configuration = new ConfigurationBuilder()
-            
+
             .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName)
             .AddJsonFile("appsettings.json", false)
             .Build();
@@ -62,7 +63,10 @@ public class ContainerConfiguration
         containerBuilder.RegisterInstance(configuration).As<IConfigurationRoot>();
         // Add app
         containerBuilder.RegisterType<App>().AsSelf();
-
+        var token = Environment.GetEnvironmentVariable("bottoken") ?? ""; //TODO: not forget insert bot token
+        containerBuilder.RegisterType<Telegram.Bot.TelegramBotClient>().WithParameter("token", token).AsImplementedInterfaces();
+        containerBuilder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient()).As<HttpClient>();
+        //containerBuilder.RegisterType<Telegram.Bot.TelegramBotClient>()
 
         // Creating a new AutofacServiceProvider makes the container
         // available to your app using the Microsoft IServiceProvider
