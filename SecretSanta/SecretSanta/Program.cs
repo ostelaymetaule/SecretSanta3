@@ -19,6 +19,13 @@ var serviceProvider = ContainerConfiguration.Configure(serviceCollection);
 try
 {
     Log.Information("Starting service");
+    
+    var dirs = Directory.EnumerateDirectories(Environment.CurrentDirectory);
+    foreach (var item in dirs)
+    {
+        Log.Information(item);
+        
+    }
     await serviceProvider.GetService<App>().Run();
     Log.Information("Ending service");
 }

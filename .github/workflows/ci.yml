@@ -57,6 +57,6 @@ jobs:
 
         - name: Start the server
           if: ${{ always() }}
-          run: ssh scalewayprod 'cd /home/secretsanta && docker run -d -v /home/secretsanta/rep:/app/SecretSanta --name secretsanta --env-file ./env -p 8086:80  -t secretsanta3:latest'
+          run: ssh scalewayprod 'cd /home/secretsanta && docker run -d -v /home/secretsanta/rep:/app/rep --name secretsanta --env-file ./env -p 8086:80  -t secretsanta3:latest'
 
  
