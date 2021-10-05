@@ -1,5 +1,5 @@
 # FROM mcr.microsoft.com/dotnet/core/sdk:6.0-alpine AS build
-FROM mcr.microsoft.com/dotnet/core/sdk:6.0-alpine as build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine as build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -13,7 +13,7 @@ WORKDIR /app/SecretSanta
 RUN dotnet publish -c Release --no-restore -o out
 
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:6.0-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine AS runtime
 WORKDIR /app
 COPY --from=build /app/SecretSanta/out ./
 ENTRYPOINT ["dotnet", "SecretSanta3.dll"]
