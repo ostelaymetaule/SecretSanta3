@@ -1,0 +1,26 @@
+Secret santa bot
+
+Telegram api:
+    ☐ di setup
+    ☐ main bot loop
+    ☐ registering for the secret santa
+    ☐ creating "rooms" for different chats and groups
+    ☐ creating a feedback channel
+    ☐ allow anonimous communication between user pairs
+    ☐ create geo-tags for sending preferences like "only country x" or "worldwide" for better pairings 
+    ☐ create command console for admin
+    ☐ allow admin per group from resending notifications?
+    data storage:
+        ☐ decide what to use to store things locally
+        ☐ keep the data between container restarts
+
+Ops:
+    ☐ setup ci/cd pipiline with github actions
+    logging:
+        ☐ logging exceptions to a private chat
+        ☐ downloading log dumps via command
+    create telegram bot:
+        ☐ prod bot
+        ☐ test bot
+        ☐ environment variables for bot secrets
+
