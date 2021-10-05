@@ -1,0 +1,62 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  deploy:
+      name: "Deploy to scalewayprod"
+      runs-on: ubuntu-latest
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      # needs: test
+      steps:
+        - name: Configure SSH
+          run: |
+            mkdir -p ~/.ssh/
+            echo "$SSH_KEY" > ~/.ssh/scalewayprod.key
+            chmod 600 ~/.ssh/scalewayprod.key
+            cat >>~/.ssh/config <<END
+            Host scalewayprod
+              HostName $SSH_HOST
+              User $SSH_USER
+              IdentityFile ~/.ssh/scalewayprod.key
+              StrictHostKeyChecking no
+            END
+          env:
+            SSH_USER: ${{ secrets.SSHUSER }}
+            SSH_KEY: ${{ secrets.SSHKEY }}
+            SSH_HOST: ${{ secrets.SSHHOSTSCALEWAYIP }}
+   
+        - name: Check out the source
+          run: ssh scalewayprod 'cd ../secretsanta && git fetch && git reset --hard origin/master && echo "$MY_ENV" > env '
+             
+        - name: Write Env file
+          run: echo "$MY_ENV" | ssh scalewayprod "cat > ../secretsanta/env"
+          env:
+            MY_ENV: ${{ secrets.ENV }} 
+            
+        - name: Stop the server
+          run: ssh scalewayprod 'cd ../secretsanta && docker stop secretsanta'
+          
+        - name: RM the image
+          run: ssh scalewayprod 'cd ../secretsanta && docker rm secretsanta'
+          
+        - name: Build the image
+          run: ssh scalewayprod 'cd ../secretsanta && docker build -t secretsanta3 . '
+
+        - name: Start the server
+          if: ${{ always() }}
+          run: ssh scalewayprod 'cd ../secretsanta && docker run -d -v /home/secretsanta/rep:/app/SecretSanta --name secretsanta --env-file ./env -p 8086:80  -t secretsanta3:latest'
+
+ 
