@@ -29,7 +29,7 @@ public class ContainerConfiguration
             builder
                 .AddSerilog(dispose: true);
         }));
-
+        serviceCollection.AddHttpClient();
 
         // The Microsoft.Extensions.Logging package provides this one-liner
         // to add logging services.
