@@ -1,7 +1,7 @@
 Secret santa bot
 
 Telegram api:
-    ☐ di setup
+    ✔ di setup @done(21-10-05 22:02)
     ☐ main bot loop
     ☐ registering for the secret santa
     ☐ creating "rooms" for different chats and groups
@@ -15,7 +15,7 @@ Telegram api:
         ☐ keep the data between container restarts
 
 Ops:
-    ☐ setup ci/cd pipiline with github actions
+    ✔ setup ci/cd pipiline with github actions @done(21-10-05 22:02)
     logging:
         ☐ logging exceptions to a private chat
         ☐ downloading log dumps via command

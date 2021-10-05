@@ -23,9 +23,17 @@ try
     var dirs = Directory.EnumerateDirectories(Environment.CurrentDirectory);
     foreach (var item in dirs)
     {
-        Log.Information(item);
-        
+        Log.Debug(item);
+        var fileNames = new DirectoryInfo(item).EnumerateFiles().Select(x=>x.FullName).ToList();
+        foreach (var fileName in fileNames)
+        {
+            Log.Debug(fileName);
+        }
+
     }
+    
+
+
     await serviceProvider.GetService<App>().Run();
     Log.Information("Ending service");
 }
