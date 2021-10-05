@@ -39,24 +39,24 @@ jobs:
             SSH_HOST: ${{ secrets.SSHHOSTSCALEWAYIP }}
    
         - name: Check out the source
-          run: ssh scalewayprod 'cd ../secretsanta && git fetch && git reset --hard origin/master && echo "$MY_ENV" > env '
+          run: ssh scalewayprod 'cd /home/secretsanta && git fetch && git reset --hard origin/master && echo "$MY_ENV" > env '
              
         - name: Write Env file
-          run: echo "$MY_ENV" | ssh scalewayprod "cat > ../secretsanta/env"
+          run: echo "$MY_ENV" | ssh scalewayprod "cat > /home/secretsanta/env"
           env:
             MY_ENV: ${{ secrets.ENV }} 
             
         - name: Stop the server
-          run: ssh scalewayprod 'cd ../secretsanta && docker stop secretsanta'
+          run: ssh scalewayprod 'cd /home/secretsanta && docker stop secretsanta'
           
         - name: RM the image
-          run: ssh scalewayprod 'cd ../secretsanta && docker rm secretsanta'
+          run: ssh scalewayprod 'cd /home/secretsanta && docker rm secretsanta'
           
         - name: Build the image
-          run: ssh scalewayprod 'cd ../secretsanta && docker build -t secretsanta3 . '
+          run: ssh scalewayprod 'cd /home/secretsanta && docker build -t secretsanta3 . '
 
         - name: Start the server
           if: ${{ always() }}
-          run: ssh scalewayprod 'cd ../secretsanta && docker run -d -v /home/secretsanta/rep:/app/SecretSanta --name secretsanta --env-file ./env -p 8086:80  -t secretsanta3:latest'
+          run: ssh scalewayprod 'cd /home/secretsanta && docker run -d -v /home/secretsanta/rep:/app/SecretSanta --name secretsanta --env-file ./env -p 8086:80  -t secretsanta3:latest'
 
  
