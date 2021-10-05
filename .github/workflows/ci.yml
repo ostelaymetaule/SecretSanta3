@@ -47,10 +47,10 @@ jobs:
             MY_ENV: ${{ secrets.ENV }} 
             
         - name: Stop the server
-          run: ssh scalewayprod 'cd /home/secretsanta && docker stop secretsanta'
+          run: ssh scalewayprod 'cd /home/secretsanta && docker stop secretsanta || true'
           
         - name: RM the image
-          run: ssh scalewayprod 'cd /home/secretsanta && docker rm secretsanta'
+          run: ssh scalewayprod 'cd /home/secretsanta && docker rm secretsanta || true'
           
         - name: Build the image
           run: ssh scalewayprod 'cd /home/secretsanta && docker build -t secretsanta3 . '
