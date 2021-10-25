@@ -11,7 +11,8 @@ Telegram api:
     ☐ create command console for admin
     ☐ allow admin per group from resending notifications?
     data storage:
-        ☐ decide what to use to store things locally
+        ✔ decide what to use to store things locally @done(21-10-25 21:57)
+        ✔ create persistant repository @done(21-10-25 21:58)
         ☐ keep the data between container restarts
 
 Ops:
