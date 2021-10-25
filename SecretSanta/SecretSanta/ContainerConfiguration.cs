@@ -5,13 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+
 
 public class ContainerConfiguration
 {
@@ -61,7 +55,7 @@ public class ContainerConfiguration
             .Build();
         // Add access to generic IConfigurationRoot
         containerBuilder.RegisterInstance(configuration).As<IConfigurationRoot>();
-        // Add app
+        // Add app 
         containerBuilder.RegisterType<App>().AsSelf();
         var token = Environment.GetEnvironmentVariable("bottoken") ?? ""; //TODO: not forget insert bot token
         containerBuilder.RegisterType<Telegram.Bot.TelegramBotClient>().WithParameter("token", token).AsImplementedInterfaces();
