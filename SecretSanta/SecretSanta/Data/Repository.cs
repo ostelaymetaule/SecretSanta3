@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SecretSanta.Data
 {
-    internal class Repository
+    public class Repository
     {
         private Microsoft.Extensions.Caching.Memory.IMemoryCache _memoryCache;
         private LiteDB.ILiteDatabase _db;

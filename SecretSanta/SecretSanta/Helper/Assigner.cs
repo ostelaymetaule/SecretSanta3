@@ -8,7 +8,7 @@ using SecretSanta.Data;
 
 namespace SecretSanta.Helper
 {
-    internal class Assigner
+    public class Assigner
     {
         private Repository _repository;
         private readonly ILogger<Assigner> _logger;

@@ -18,6 +18,7 @@ namespace SecretSanta.Model
     public enum Status
     {
         init,
+        roomCreated,
         registrationClosed,
         drawn,
         instructionsSent,
