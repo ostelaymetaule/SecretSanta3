@@ -106,11 +106,12 @@ namespace SecretSanta.Helper
                         case SHOW_INFO:
                             await _botClient.SendTextMessageAsync(
                     message.Chat,
-                    $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<"
-                );
+                    $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<" ); 
+                            me.ParticipantStatus = ParticipantStatus.progress;
                             break;
                         default:
                             me.UnformattedText = me.UnformattedText + " \n " + message.Text;
+                            me.ParticipantStatus = ParticipantStatus.progress;
                             break;
                     }
 
