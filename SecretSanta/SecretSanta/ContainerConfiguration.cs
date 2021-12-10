@@ -4,6 +4,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SecretSanta.Data;
 using SecretSanta.Helper;
 using Serilog;
 
@@ -58,8 +59,9 @@ public class ContainerConfiguration
         containerBuilder.RegisterInstance(configuration).As<IConfigurationRoot>();
         // Add app 
         containerBuilder.RegisterType<App>().AsSelf();
+        containerBuilder.RegisterType<Repository>().AsSelf();
         var token = Environment.GetEnvironmentVariable("bottoken") ?? ""; //TODO: not forget insert bot token
-        containerBuilder.RegisterType<Telegram.Bot.TelegramBotClient>().WithParameter("token", token).AsImplementedInterfaces();
+        containerBuilder.RegisterType<Telegram.Bot.TelegramBotClient>().WithParameter("token", token).AsSelf();
         containerBuilder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient()).As<HttpClient>();
         containerBuilder.RegisterType<Assigner>().AsSelf();
         containerBuilder.RegisterType<ClientTG>().AsSelf();
