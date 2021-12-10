@@ -8,6 +8,7 @@ namespace SecretSanta.Model
 {
     public class ChatGroup
     {
+        public Guid Id { get; set; }
         public long ChatId { get; set; }
         public string GroupName { get; set; }
         public List<Participant> Participants { get; set; }

@@ -15,10 +15,18 @@ namespace SecretSanta.Model
         public string PostalAddress { get; set; }
         public string TrackingInformation { get; set; }
         public LocationMarker CanSendTo { get; set; }
-
+        public string UnformattedText { get; set; }
         public SantaMatching SantaMatching { get; set; }
+        public string LastMessage { get; set; }
+        public ParticipantStatus ParticipantStatus { get; set; }
 
-
+    }
+    public enum ParticipantStatus
+    {
+        init,
+        progress,
+        confirmed,
+        cleared
     }
     public enum LocationMarker
     {

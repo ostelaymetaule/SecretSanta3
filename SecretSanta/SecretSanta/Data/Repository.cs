@@ -42,9 +42,14 @@ namespace SecretSanta.Data
                 if (!exists)
                 {
                     chatgroup.Status = Status.init; //todo: move to constructor?
+                    chatGroupCollection.Upsert(chatgroup);
+
                 }
-                chatGroupCollection.Upsert(chatgroup);
-                chatGroupCollection.EnsureIndex(x => x.ChatId);
+                else
+                {
+                    var updated = chatGroupCollection.Update(chatgroup);
+                }
+                chatGroupCollection.EnsureIndex(x => x.GroupName);
             }
         }
         /// <summary>
@@ -55,7 +60,9 @@ namespace SecretSanta.Data
         {
             using (var db = new LiteDatabase(_dbFilePath))
             {
+                
                 var chatGroupCollection = db.GetCollection<ChatGroup>("chatgroup");
+                //chatGroupCollection.DeleteAll();
                 return chatGroupCollection.Query().Select(x => x).ToList();
             }
         }
