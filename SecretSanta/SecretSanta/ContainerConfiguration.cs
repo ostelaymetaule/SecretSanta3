@@ -74,7 +74,7 @@ public class ContainerConfiguration
         // binding directly to Autofac.
         var container = containerBuilder.Build();
         var serviceProvider = new AutofacServiceProvider(container);
-
+         
         return serviceProvider;
     }
 }
