@@ -255,7 +255,7 @@ namespace SecretSanta.Helper
         }
 
         //TODO: admin create a room and get an id  (random set of nouns?)
-        //TODO: admin seeing if someone not filled the information
+         
         //TODO: admin triggering the assignment
 
         //TODO: participant: join an existing group by id
