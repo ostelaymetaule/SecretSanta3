@@ -170,25 +170,23 @@ namespace SecretSanta.Helper
                 _rep.Save(_group);
 
                 var helloMessage = @"sup, %юзернейм%,";
-                if (me.ParticipantStatus == ParticipantStatus.init)
+                switch (me.ParticipantStatus)
                 {
-                    helloMessage = HELLO_INIT;
-                }
-                else if (me.ParticipantStatus == ParticipantStatus.progress)
-                {
-                    helloMessage = HELLO_PROGRESS;
-                }
-                else if (me.ParticipantStatus == ParticipantStatus.cleared)
-                {
-                    helloMessage = HELLO_CLEARED;
-                }
-                else if (me.ParticipantStatus == ParticipantStatus.confirmed)
-                {
-                    helloMessage = $"{HELLO_CONFIRMED} >> {me.UnformattedText} <<";
-                }
-                else if (me.ParticipantStatus == ParticipantStatus.cancelled)
-                {
-                    helloMessage = HELLO_CANCELLED;
+                    case ParticipantStatus.init:
+                        helloMessage = HELLO_INIT;
+                        break;
+                    case ParticipantStatus.progress:
+                        helloMessage = HELLO_PROGRESS;
+                        break;
+                    case ParticipantStatus.cleared:
+                        helloMessage = HELLO_CLEARED;
+                        break;
+                    case ParticipantStatus.confirmed:
+                        helloMessage = $"{HELLO_CONFIRMED} >> {me.UnformattedText} <<";
+                        break;
+                    case ParticipantStatus.cancelled:
+                        helloMessage = HELLO_CANCELLED;
+                        break;
                 }
 
 
