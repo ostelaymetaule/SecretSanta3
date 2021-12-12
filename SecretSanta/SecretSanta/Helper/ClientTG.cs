@@ -30,7 +30,7 @@ namespace SecretSanta.Helper
         private const string HELLO_PROGRESS = "Можешь дополнять написаный текст отсылая новые строчки или же стереть все и начать заново (для этого есть кнопки снизу экрана)";
         private const string HELLO_CLEARED = "Не забудь написать свой почтовый адрес с именем =)";
         private const string HELLO_CONFIRMED = "Отлично, я все записал и передам твоему санте когда он заматчится:";
-        public const string HELLO_CANCELLED = "Пони, удолил твой адресс и не буду учитывать тебя в сикретсанте";
+        public const string HELLO_CANCELLED = "Пони, удолил твой адрес и не буду учитывать тебя в сикретсанте";
 
         private readonly Assigner _assigner;
         private readonly Repository _rep;
