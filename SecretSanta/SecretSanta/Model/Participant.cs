@@ -26,7 +26,8 @@ namespace SecretSanta.Model
         init,
         progress,
         confirmed,
-        cleared
+        cleared,
+        cancelled
     }
     public enum LocationMarker
     {

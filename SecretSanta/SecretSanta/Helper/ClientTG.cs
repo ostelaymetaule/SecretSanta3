@@ -20,12 +20,24 @@ namespace SecretSanta.Helper
     {
         private const string CONFIRM_ADDRESS = "Йо, всё отлично так и отсылай";
         private const string CLEAR_INFO = "Не, давай заново";
-        private const string SHOW_INFO = "Просто напомни мне еще раз";
+        private const string SHOW_INFO = "Покажи всю информацию еще раз";
+        private const string SINGN_OUT = "Не хочу участвовать";
+
+        private const string HELLO_INIT = @"напиши мне свой адрес, 
+что бы хотел получить и что бы не очень хотел, 
+например там вдруг ты терпеть ненавидишь кулинарные книги, но любишь фигурки октокота, 
+чтобы санте было проще подобрать для тебя что-то что не отправится в мусорку в первый же день";
+        private const string HELLO_PROGRESS = "Можешь дополнять написаный текст отсылая новые строчки или же стереть все и начать заново (для этого есть кнопки снизу экрана)";
+        private const string HELLO_CLEARED = "Не забудь написать свой почтовый адрес с именем =)";
+        private const string HELLO_CONFIRMED = "Отлично, я все записал и передам твоему санте когда он заматчится:";
         private readonly Assigner _assigner;
         private readonly Repository _rep;
         private readonly TelegramBotClient _botClient;
         private ILogger<ClientTG> _logger;
         private ChatGroup _group;
+
+        public string HELLO_CANCELLED { get; private set; }
+
         public ClientTG(ILogger<ClientTG> logger, Assigner assigner, Repository repository, TelegramBotClient botClient)
         {
             this._assigner = assigner ?? throw new NullReferenceException(nameof(assigner));
@@ -109,6 +121,9 @@ namespace SecretSanta.Helper
                     $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<" ); 
                             me.ParticipantStatus = ParticipantStatus.progress;
                             break;
+                        case SINGN_OUT:
+                            me.ParticipantStatus = ParticipantStatus.cancelled;
+                            break;
                         default:
                             me.UnformattedText = me.UnformattedText + " \n " + message.Text;
                             me.ParticipantStatus = ParticipantStatus.progress;
@@ -122,30 +137,32 @@ namespace SecretSanta.Helper
                 var helloMessage = @"sup, %юзернейм%,";
                 if (me.ParticipantStatus == ParticipantStatus.init)
                 {
-                    helloMessage = 
-@"напиши мне свой адрес, 
-что бы хотел получить и что бы не очень хотел, 
-например там вдруг ты терпеть ненавидишь кулинарные книги, но любишь фигурки октокота, 
-чтобы санте было проще подобрать для тебя что-то что не отправится в мусорку в первый же день";
+                    helloMessage = HELLO_INIT;
                 }
                 else if(me.ParticipantStatus == ParticipantStatus.progress)
                 {
-                    helloMessage = "Можешь дополнять написаный текст отсылая новые строчки или же стереть все и начать заново (для этого есть кнопки снизу экрана)";
+                    helloMessage = HELLO_PROGRESS;
                 }
                 else if (me.ParticipantStatus == ParticipantStatus.cleared)
                 {
-                    helloMessage = "Не забудь написать свой почтовый адрес с именем =)";
+                    helloMessage = HELLO_CLEARED;
                 }
                 else if (me.ParticipantStatus == ParticipantStatus.confirmed)
                 {
-                    helloMessage = $"Отлично, я все записал и передам твоему санте когда он заматчится: >> {me.UnformattedText} <<";
+                    helloMessage = $"{HELLO_CONFIRMED} >> {me.UnformattedText} <<";
+                }
+                else if (me.ParticipantStatus == ParticipantStatus.cancelled)
+                {
+
+                    helloMessage = HELLO_CANCELLED;
                 }
 
 
-                    AskButton(message.Chat.Id, helloMessage, new List<string>() {
+                AskButton(message.Chat.Id, helloMessage, new List<string>() {
                 //ADDRESS,
                 CONFIRM_ADDRESS,
                 CLEAR_INFO,
+                SINGN_OUT,
                 //CAN_SEND_TO,
                 //LOVE_TO_RECEIVE,
                 //DO_NOT_LOVE_TO_RECEIVE,
@@ -155,7 +172,12 @@ namespace SecretSanta.Helper
             }
         }
 
-
+        /// <summary>
+        /// Sends buttons with given text opions
+        /// </summary>
+        /// <param name="chatId">Chat or user to send the mesages to</param>
+        /// <param name="qustionText">Text being send as a message before buttons </param>
+        /// <param name="options">list of texts to be send as buttons</param>
         private async void AskButton(long chatId, string qustionText, List<string> options)
         {
             var keyboard = new ReplyKeyboardMarkup(options.Select(x => new[] { new KeyboardButton(x) }).ToArray());
@@ -176,22 +198,7 @@ namespace SecretSanta.Helper
             await _botClient.SendTextMessageAsync(chatId, qustionText,
                 replyMarkup: keyboard);
         }
-        //async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        //{
-        //    if (update.Message is Message message)
-        //    {
-        //        await botClient.SendTextMessageAsync(message.Chat, "Hello");
-        //    }
-        //}
-
-        //async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        //{
-        //    if (exception is ApiRequestException apiRequestException)
-        //    {
-        //        await botClient.SendTextMessageAsync(123, apiRequestException.ToString());
-        //    }
-        //}
-
+      
         //TODO: admin create a room and get an id  (random set of nouns?)
         //TODO: admin seeing if someone not filled the information
         //TODO: admin triggering the assignment
