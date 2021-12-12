@@ -30,14 +30,18 @@ namespace SecretSanta.Helper
         private const string HELLO_PROGRESS = "Можешь дополнять написаный текст отсылая новые строчки или же стереть все и начать заново (для этого есть кнопки снизу экрана)";
         private const string HELLO_CLEARED = "Не забудь написать свой почтовый адрес с именем =)";
         private const string HELLO_CONFIRMED = "Отлично, я все записал и передам твоему санте когда он заматчится:";
+        public const string HELLO_CANCELLED = "Пони, удолил твой адресс и не буду учитывать тебя в сикретсанте";
+
         private readonly Assigner _assigner;
         private readonly Repository _rep;
         private readonly TelegramBotClient _botClient;
         private ILogger<ClientTG> _logger;
         private ChatGroup _group;
-
-        public string HELLO_CANCELLED { get; private set; }
-
+        public const string ADMIN_SHOW_NOT_FILLED_ADDRESS = "ADMIN SHOW NOT FILLED ADRESSES USERS";
+        public const string ADMIN_TRIGGERMATCHING = "ADMIN GO GO MATCHING";
+        public const string ADMIN_SEND_MATCHED_NOTIFICATION = "ADMIN SEND MATCHINGS TO SANTAS";
+        public const string BECOME_GROUP_ADMIN = "ADMIN BECOME GROUP ADMIN";
+        public const string ADMIN_RESIGN_ADMIN = "ADMIN RESIGN";
         public ClientTG(ILogger<ClientTG> logger, Assigner assigner, Repository repository, TelegramBotClient botClient)
         {
             this._assigner = assigner ?? throw new NullReferenceException(nameof(assigner));
@@ -118,12 +122,43 @@ namespace SecretSanta.Helper
                         case SHOW_INFO:
                             await _botClient.SendTextMessageAsync(
                     message.Chat,
-                    $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<" ); 
+                    $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<");
                             me.ParticipantStatus = ParticipantStatus.progress;
                             break;
                         case SINGN_OUT:
+                            me.UnformattedText = "";
                             me.ParticipantStatus = ParticipantStatus.cancelled;
                             break;
+                        case ADMIN_SHOW_NOT_FILLED_ADDRESS:
+                            int numberOfUsers = _group.Participants.Count;
+                            int numberOfUsersInactive = _group.Participants.Where(x => x.ParticipantStatus == ParticipantStatus.cancelled).Count();
+                            int numberOfUsersWithoutAddress = _group.Participants.Where(x => String.IsNullOrWhiteSpace(x.UnformattedText) || x.UnformattedText.Length < 5).Count();
+
+                            await _botClient.SendTextMessageAsync(
+                               message.Chat,
+                               $"UsersWithoutAddress: {numberOfUsersWithoutAddress}/{numberOfUsers}, InactiveUsers: {numberOfUsersInactive}/{numberOfUsers}");
+
+                            break;
+                        case ADMIN_TRIGGERMATCHING:
+                            //TODO: trigger the match
+                            break;
+                        case ADMIN_SEND_MATCHED_NOTIFICATION:
+                            //TODO: tell users about the santas
+                            break;
+                        case BECOME_GROUP_ADMIN:
+                            _group.Admin = me;
+                            await _botClient.SendTextMessageAsync(
+                    message.Chat,
+                    $"NOW YOU ARE THE ADMIN");
+                            break;
+                        case ADMIN_RESIGN_ADMIN:
+                            _group.Admin = null;
+                            await _botClient.SendTextMessageAsync(
+                    message.Chat,
+                    $"NOW YOU ARE NOW NO LONGER THE ADMIN OF THE GROUP " + _group.GroupName);
+                            break;
+                        //TODO: anonymous conversation
+
                         default:
                             me.UnformattedText = me.UnformattedText + " \n " + message.Text;
                             me.ParticipantStatus = ParticipantStatus.progress;
@@ -139,7 +174,7 @@ namespace SecretSanta.Helper
                 {
                     helloMessage = HELLO_INIT;
                 }
-                else if(me.ParticipantStatus == ParticipantStatus.progress)
+                else if (me.ParticipantStatus == ParticipantStatus.progress)
                 {
                     helloMessage = HELLO_PROGRESS;
                 }
@@ -153,22 +188,42 @@ namespace SecretSanta.Helper
                 }
                 else if (me.ParticipantStatus == ParticipantStatus.cancelled)
                 {
-
                     helloMessage = HELLO_CANCELLED;
                 }
 
 
-                AskButton(message.Chat.Id, helloMessage, new List<string>() {
-                //ADDRESS,
-                CONFIRM_ADDRESS,
-                CLEAR_INFO,
-                SINGN_OUT,
-                //CAN_SEND_TO,
-                //LOVE_TO_RECEIVE,
-                //DO_NOT_LOVE_TO_RECEIVE,
-                SHOW_INFO
+                var buttonOptions = new List<string>() {
+                    CONFIRM_ADDRESS,
+                    CLEAR_INFO,
+                    SINGN_OUT,
+                    SHOW_INFO
+                };
 
-            });
+                if (_group.Admin == null || _group.Admin.UserId == default(long))
+                {
+                    buttonOptions = new List<string>() {
+                        CONFIRM_ADDRESS,
+                        CLEAR_INFO,
+                        SINGN_OUT,
+                        SHOW_INFO,
+                        BECOME_GROUP_ADMIN
+                    };
+                }
+
+                if (_group.Admin.UserId == me.UserId)
+                {
+                    buttonOptions = new List<string>() {
+                        CONFIRM_ADDRESS,
+                        CLEAR_INFO,
+                        SINGN_OUT,
+                        SHOW_INFO,
+                        ADMIN_SHOW_NOT_FILLED_ADDRESS,
+                        ADMIN_TRIGGERMATCHING,
+                        ADMIN_SEND_MATCHED_NOTIFICATION,
+                        ADMIN_RESIGN_ADMIN
+                    };
+                }
+                AskButton(message.Chat.Id, helloMessage, buttonOptions);
             }
         }
 
@@ -198,7 +253,7 @@ namespace SecretSanta.Helper
             await _botClient.SendTextMessageAsync(chatId, qustionText,
                 replyMarkup: keyboard);
         }
-      
+
         //TODO: admin create a room and get an id  (random set of nouns?)
         //TODO: admin seeing if someone not filled the information
         //TODO: admin triggering the assignment

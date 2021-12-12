@@ -18,9 +18,14 @@ namespace SecretSanta.Model
         public string UnformattedText { get; set; }
         public SantaMatching SantaMatching { get; set; }
         public string LastMessage { get; set; }
+        /// <summary>
+        /// Bitfield for internal state checkups
+        /// </summary>
+        public int InternalStatusUpdates { get; set; }
         public ParticipantStatus ParticipantStatus { get; set; }
 
     }
+    
     public enum ParticipantStatus
     {
         init,
