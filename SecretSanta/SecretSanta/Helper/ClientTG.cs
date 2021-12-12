@@ -207,8 +207,7 @@ namespace SecretSanta.Helper
                         BECOME_GROUP_ADMIN
                     };
                 }
-
-                if (_group.Admin.UserId == me.UserId)
+                else if (_group.Admin?.UserId == me.UserId)
                 {
                     buttonOptions = new List<string>() {
                         CONFIRM_ADDRESS,
