@@ -116,6 +116,11 @@ namespace SecretSanta.Helper
                 }
                 else
                 {
+                    try
+                    {
+
+                   
+
                     switch (message.Text)
                     {
                         case CONFIRM_ADDRESS:
@@ -223,7 +228,16 @@ namespace SecretSanta.Helper
 
                             break;
                     }
+                    }
+                    catch (Exception ex)
+                    {
 
+                        _logger.LogError("Exception while sending infos to agents {ex}", ex);
+                        var admin = _group.Admin;
+                        await _botClient.SendTextMessageAsync(
+                           admin.UserId,
+                           $"Хей, тут сломалось у пользователя {me.AccountName} при приеме сообщения >> {ex.Message} <<");
+                    }
                     me.LastMessage = message.Text;
                     me.UnformattedText = me.UnformattedText.Replace("/start", "");
                     me.UnformattedText = me.UnformattedText.Replace(SINGN_OUT, "");
@@ -324,7 +338,7 @@ namespace SecretSanta.Helper
             var buttonOptions = new List<string>() {
                     SHOW_INFO };
 
-            foreach (var participant in _group.Participants.Where(x => x.ParticipantStatus == ParticipantStatus.cancelled && String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7))
+            foreach (var participant in _group.Participants.Where(x => x.ParticipantStatus != ParticipantStatus.cancelled && !String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7))
             {
                 AskButton(participant.UserId, "Секретный санта перемешивает шляпу", buttonOptions);
             }
@@ -335,7 +349,7 @@ namespace SecretSanta.Helper
         private async Task SendMatchingNotificationsAsync()
         {
 
-            foreach (var participant in _group.Participants)
+            foreach (var participant in _group.Participants.Where(x => x.ParticipantStatus != ParticipantStatus.cancelled && !String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7))
             {
                 try
                 {
