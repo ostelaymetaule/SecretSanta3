@@ -348,13 +348,13 @@ namespace SecretSanta.Helper
 
         private async Task SendMatchingNotificationsAsync()
         {
-
-            foreach (var participant in _group.Participants.Where(x => x.ParticipantStatus != ParticipantStatus.cancelled && !String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7))
+            var filledUsers = _group.Participants.Where(x => x.ParticipantStatus != ParticipantStatus.cancelled && !String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7);
+            foreach (var participant in filledUsers)
             {
                 try
                 {
                     long myChatId = participant.UserId;
-                    var receivingUser = _group.Participants.FirstOrDefault(x => x.SantaMatching.ReceivingFromId == participant.Id);
+                    var receivingUser = filledUsers.FirstOrDefault(x => x.SantaMatching.ReceivingFromId == participant.Id);
                     var receivingUserChat = await _botClient.GetChatAsync(receivingUser.UserId);
 
                     var name = $"{receivingUser.AccountName} ({receivingUserChat.FirstName} {receivingUserChat.LastName})";
@@ -373,7 +373,7 @@ namespace SecretSanta.Helper
                     var admin = _group.Admin;
                     await _botClient.SendTextMessageAsync(
                        admin.UserId,
-                       $"Хей, тут сломалось у пользователя {participant.AccountName} при отсылке инфы о внучке >> {ex.Message} <<");
+                       $"Хей, тут сломалось у пользователя {participant.AccountName} при отсылке инфы о внучке >> {ex.Message}, {ex.StackTrace}<<");
                 }
             }
             _group.Status = Status.instructionsSent;
