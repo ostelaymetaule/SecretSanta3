@@ -160,6 +160,9 @@ namespace SecretSanta.Helper
                                     participant.UnformattedText = participant.UnformattedText?.Replace(SINGN_OUT, "") ?? "";
                                     participant.UnformattedText = participant.UnformattedText?.Replace(SHOW_INFO, "") ?? "";
                                 }
+                                int numberOfDoubles = _group.Participants.GroupBy(x => x.AccountName).Count(x=>x.Count()>1);
+                                var doubles = String.Join(";",_group.Participants.GroupBy(x => x.AccountName).Where(x => x.Count() > 1).Select(x=>x.Key));
+
 
                                 int numberOfUsers = _group.Participants.Count;
                                 int numberOfUsersInactive = _group.Participants.Count(x => x.ParticipantStatus == ParticipantStatus.cancelled);
@@ -167,7 +170,7 @@ namespace SecretSanta.Helper
 
                                 await _botClient.SendTextMessageAsync(
                                    message.Chat,
-                                   $"UsersWithoutAddress: {numberOfUsersWithoutAddress}/{numberOfUsers}, InactiveUsers: {numberOfUsersInactive}/{numberOfUsers}");
+                                   $"doubles: {numberOfDoubles}:{doubles} UsersWithoutAddress: {numberOfUsersWithoutAddress}/{numberOfUsers}, InactiveUsers: {numberOfUsersInactive}/{numberOfUsers}");
 
                                 break;
                             case ADMIN_TRIGGERMATCHING:
