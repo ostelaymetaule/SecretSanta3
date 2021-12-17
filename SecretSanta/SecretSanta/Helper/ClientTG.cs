@@ -360,10 +360,10 @@ namespace SecretSanta.Helper
                     var name = $"{receivingUser.AccountName} ({receivingUserChat.FirstName} {receivingUserChat.LastName})";
                     await _botClient.SendTextMessageAsync(
                        myChatId,
-                       $"Глубокий ИскусственныйИннокентий посовещался и решил что твой внучок на этот год с никнемом {name}, не пиши ему сам, позже тут появится функция связаться с ним анонимно чтобы например уточнить адрес или договориться о передаче лично");
+                       $"Глубокий ИскусственныйИннокентий посовещался и решил что твой внучок на этот год с никнемом {name}, не пиши ему сам, тут появится кнопка чтобы связаться с ним анонимно чтобы например уточнить адрес или договориться о передаче лично. Нюдсы правда слать можно только текстом");
                     await _botClient.SendTextMessageAsync(
                         myChatId,
-                        $"Хей, секретный санта! Вот что написал тебе твой внучок: >> {receivingUser.UnformattedText} <<");
+                        $"Хей, секретный санта! Вот что написал тебе твой внучок: \n\n>> {receivingUser.UnformattedText} <<");
 
                     participant.InternalStatusUpdates = 1;
                 }
