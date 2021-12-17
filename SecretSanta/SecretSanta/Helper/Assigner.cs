@@ -55,12 +55,12 @@ namespace SecretSanta.Helper
             _logger.LogDebug("Prepare to match santas in chat {chat} with id {id}", currentChat.GroupName, groupId);
             var santasWithMatch = new List<Model.Participant>();
 
-            foreach (var participant in currentChat.Participants)
-            {
-                participant.UnformattedText = participant.UnformattedText.Replace("/start", "");
-                participant.UnformattedText = participant.UnformattedText.Replace(SINGN_OUT, "");
-                participant.UnformattedText = participant.UnformattedText.Replace(SHOW_INFO, "");
-            }
+            //foreach (var participant in currentChat.Participants)
+            //{
+            //    participant.UnformattedText = participant.UnformattedText? .Replace("/start", "");
+            //    participant.UnformattedText = participant.UnformattedText.Replace(SINGN_OUT, "");
+            //    participant.UnformattedText = participant.UnformattedText.Replace(SHOW_INFO, "");
+            //}
         
 
             var notMatchedSantas = currentChat.Participants.Where(p => !String.IsNullOrEmpty(p.UnformattedText) && p.UnformattedText.Length > 7 && p.ParticipantStatus != Model.ParticipantStatus.cancelled).ToList();
