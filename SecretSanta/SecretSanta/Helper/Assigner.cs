@@ -12,7 +12,8 @@ namespace SecretSanta.Helper
     {
         private Repository _repository;
         private readonly ILogger<Assigner> _logger;
-
+        private const string SHOW_INFO = "Покажи всю информацию еще раз";
+        private const string SINGN_OUT = "Не хочу участвовать";
         public Assigner(Repository repository, ILogger<Assigner> logger)
         {
             _repository = repository;
@@ -44,60 +45,83 @@ namespace SecretSanta.Helper
         /// сохраняем список сант с внучками в базу
         /// </summary>
         /// <returns></returns>
-        public List<(string Santa, string Grandson)> TriggerMatching(long chatId)
+        public List<(string Santa, string Grandson)> TriggerMatching(Guid groupId)
         {
 
-            var currentChat = _repository.GetById(chatId);
-            _logger.LogDebug("Prepare to match santas in chat {chat} with id {id}", currentChat.GroupName, chatId);
+            var currentChat = _repository.GetByGroupId(groupId);
 
-            var allParticipantsWithAddress = currentChat.Participants.Where(p => !String.IsNullOrEmpty(p.PostalAddress)).ToList();
-            int potentialSantas = allParticipantsWithAddress.Count();
-            _logger.LogInformation("Found {potentialSantas} santas", potentialSantas);
 
-            var currentSanta = allParticipantsWithAddress[Random.Shared.Next(0, potentialSantas)];
-            var firstSanta = currentSanta;
-            allParticipantsWithAddress.Remove(currentSanta);
-            potentialSantas--;
-            Model.Participant target;
-            while (allParticipantsWithAddress.Any())
+
+            _logger.LogDebug("Prepare to match santas in chat {chat} with id {id}", currentChat.GroupName, groupId);
+            var santasWithMatch = new List<Model.Participant>();
+
+            foreach (var participant in currentChat.Participants)
             {
-                //default behaivior is to find someone to send the present to
-                int nextMatchingIndexOfParticipants = Random.Shared.Next(0, potentialSantas);
-                target = allParticipantsWithAddress[nextMatchingIndexOfParticipants];
-
-                if (currentSanta.CanSendTo == Model.LocationMarker.Country)
-                {
-                    //But if we can we should consider the preferences of the same-country-post
-                    var sameCountryParticipants = allParticipantsWithAddress.Where(p => p.Location == currentSanta.Location).ToList();
-                    if (sameCountryParticipants.Any())
-                    {
-                        int nextMatchingIndexOfLocalParticipants = Random.Shared.Next(0, sameCountryParticipants.Count);
-                        target = sameCountryParticipants[nextMatchingIndexOfLocalParticipants];
-                    }
-                    else
-                    {
-                        _logger.LogDebug("no matching same country participants, use global list");
-
-                    }
-                }
-                //link the giver and receiver
-                currentSanta.SantaMatching.SendingToId = target.Id;
-                target.SantaMatching.ReceivingFromId = currentSanta.Id;
-                currentSanta = target;
-                allParticipantsWithAddress.Remove(currentSanta);
-                potentialSantas--;
+                participant.UnformattedText = participant.UnformattedText.Replace("/start", "");
+                participant.UnformattedText = participant.UnformattedText.Replace(SINGN_OUT, "");
+                participant.UnformattedText = participant.UnformattedText.Replace(SHOW_INFO, "");
             }
-            firstSanta.SantaMatching.SendingToId = currentSanta.Id;
-            currentSanta.SantaMatching.ReceivingFromId = firstSanta.Id;
+        
+
+            var notMatchedSantas = currentChat.Participants.Where(p => !String.IsNullOrEmpty(p.UnformattedText) && p.UnformattedText.Length > 7 && p.ParticipantStatus != Model.ParticipantStatus.cancelled).ToList();
+
+
+            Random r = new Random();
+            var restTargetCount = notMatchedSantas.Count;
+            var firstSanta = notMatchedSantas[r.Next(restTargetCount)];
+            firstSanta.SantaMatching = new Model.SantaMatching();
+            var santa = firstSanta;
+            restTargetCount--;
+            notMatchedSantas.Remove(santa);
+
+
+            _logger.LogInformation("Found {potentialSantas} santas", notMatchedSantas.Count);
+
+
+            while (restTargetCount > 0)
+            {
+
+                //default behaivior is to find someone to send the present to
+
+                var nextRandomIndexOfGlobalSantas = r.Next(notMatchedSantas.Count);
+                var target = notMatchedSantas[nextRandomIndexOfGlobalSantas];
+
+
+                //link the giver and receiver
+                if (santa.SantaMatching == null)
+                {
+                    santa.SantaMatching = new Model.SantaMatching();
+                }
+                santa.SantaMatching.SendingToId = target.Id;
+                if (target.SantaMatching == null)
+                {
+                    target.SantaMatching = new Model.SantaMatching();
+                }
+                target.SantaMatching.ReceivingFromId = santa.Id;
+
+                santasWithMatch.Add(santa);
+                santa = target;
+                restTargetCount--;
+                notMatchedSantas.Remove(santa);
+
+            }
+
+            santa.SantaMatching.SendingToId = firstSanta.Id;
+            firstSanta.SantaMatching.ReceivingFromId = santa.Id;
+            santasWithMatch.Add(santa);
+            List<(string Santa, string Grandson)> ret = santasWithMatch.Select(p =>
+                    (Santa: santasWithMatch.FirstOrDefault(x => x.Id == p.SantaMatching?.ReceivingFromId)?.AccountName,
+                    Grandson: santasWithMatch.FirstOrDefault(x => x.Id == p.SantaMatching?.SendingToId)?.AccountName))
+                .ToList();
+
+
+
             _logger.LogDebug("Saving chat group to DB");
 
             _repository.Save(currentChat);
             _logger.LogDebug("Creating tuple of matched names");
 
-            List<(string Santa, string Grandson)> ret = allParticipantsWithAddress.Select(p =>
-                    (Santa: allParticipantsWithAddress.FirstOrDefault(x => x.Id == p.SantaMatching.ReceivingFromId).FullName,
-                    Grandson: allParticipantsWithAddress.FirstOrDefault(x => x.Id == p.SantaMatching.SendingToId).FullName))
-                .ToList();
+
             return ret;
 
         }

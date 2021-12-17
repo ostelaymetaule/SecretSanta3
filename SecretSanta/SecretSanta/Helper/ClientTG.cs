@@ -22,6 +22,10 @@ namespace SecretSanta.Helper
         private const string CLEAR_INFO = "Не, давай заново";
         private const string SHOW_INFO = "Покажи всю информацию еще раз";
         private const string SINGN_OUT = "Не хочу участвовать";
+        private const string MESSAGE_MY_RECEIPIENT = "Написать внучку анонимно";
+        private const string MESSAGE_MY_SANTA = "Написать своему санте анонимно";
+        private const string TELL_ME_WHAT_TO_SEND_TO_RECEIPIENT = "В следующем сообщении напиши что передать твоему внучку анонимно, например треккинг номер посылки, чтобы он её вовремя забрал с почты:";
+        private const string TELL_ME_WHAT_TO_SEND_TO_SANTA = "В следующем сообщении напиши что передать твоему сикрет санте анонимно, например что он забыл дать тебе треккинг номер:";
 
         private const string HELLO_INIT = @"напиши мне свой адрес, 
 что бы хотел получить и что бы не очень хотел, 
@@ -90,6 +94,8 @@ namespace SecretSanta.Helper
 
         private async Task HandleUpdate(Update update)
         {
+            var helloMessage = @"sup, %юзернейм%,";
+
             if (update.Message is Message message)
             {
 
@@ -129,10 +135,30 @@ namespace SecretSanta.Helper
                             me.UnformattedText = "";
                             me.ParticipantStatus = ParticipantStatus.cancelled;
                             break;
+                        case MESSAGE_MY_RECEIPIENT:
+                            
+                            helloMessage = TELL_ME_WHAT_TO_SEND_TO_RECEIPIENT;
+                            //todo
+                            break;
+                        case MESSAGE_MY_SANTA:
+
+                            helloMessage = TELL_ME_WHAT_TO_SEND_TO_SANTA;
+                            //todo
+                            break;
+
+
                         case ADMIN_SHOW_NOT_FILLED_ADDRESS:
+
+                            foreach (var participant in _group.Participants)
+                            {
+                                participant.UnformattedText = participant.UnformattedText.Replace("/start", "");
+                                participant.UnformattedText = participant.UnformattedText.Replace(SINGN_OUT, "");
+                                participant.UnformattedText = participant.UnformattedText.Replace(SHOW_INFO, "");
+                            }
+
                             int numberOfUsers = _group.Participants.Count;
                             int numberOfUsersInactive = _group.Participants.Where(x => x.ParticipantStatus == ParticipantStatus.cancelled).Count();
-                            int numberOfUsersWithoutAddress = _group.Participants.Where(x => String.IsNullOrWhiteSpace(x.UnformattedText) || x.UnformattedText.Length < 5).Count();
+                            int numberOfUsersWithoutAddress = _group.Participants.Where(x => String.IsNullOrWhiteSpace(x.UnformattedText) || x.UnformattedText.Length < 7).Count();
 
                             await _botClient.SendTextMessageAsync(
                                message.Chat,
@@ -140,9 +166,11 @@ namespace SecretSanta.Helper
 
                             break;
                         case ADMIN_TRIGGERMATCHING:
+                            MatchSantasAndFindPairs();
                             //TODO: trigger the match
                             break;
                         case ADMIN_SEND_MATCHED_NOTIFICATION:
+                            SendMatchingNotificationsAsync();
                             //TODO: tell users about the santas
                             break;
                         case BECOME_GROUP_ADMIN:
@@ -160,34 +188,76 @@ namespace SecretSanta.Helper
                         //TODO: anonymous conversation
 
                         default:
-                            me.UnformattedText = me.UnformattedText + " \n " + message.Text;
-                            me.ParticipantStatus = ParticipantStatus.progress;
+
+                            if (me.LastMessage == MESSAGE_MY_RECEIPIENT)
+                            {
+                                //long myChatId = me.UserId;
+                                var receivingUser = _group.Participants.FirstOrDefault(x => x.Id == me.SantaMatching.SendingToId);
+                                var receivingUserChat = await _botClient.GetChatAsync(receivingUser.UserId);
+
+                                  helloMessage = @"Передал внучку";
+
+                                await _botClient.SendTextMessageAsync(
+                                receivingUserChat.Id,
+                                $"Твой санта просил передать: {message.Text}");
+                            }
+                            else if (me.LastMessage == MESSAGE_MY_SANTA)
+                            {
+                                var mySantaUser = _group.Participants.FirstOrDefault(x => x.Id == me.SantaMatching.ReceivingFromId);
+                                var mySantaUserChat = await _botClient.GetChatAsync(mySantaUser.UserId);
+                                helloMessage = @"Передал санте";
+
+
+                                await _botClient.SendTextMessageAsync(
+                                mySantaUserChat.Id,
+                                $"Твой внучок просил передать: {message.Text}");
+                            }
+                            else if (me.ParticipantStatus < ParticipantStatus.confirmed)
+                            {
+
+                                me.UnformattedText = me.UnformattedText + " \n " + message.Text;
+
+
+                                me.ParticipantStatus = ParticipantStatus.progress;
+                            }
+
                             break;
                     }
 
                     me.LastMessage = message.Text;
+                    me.UnformattedText = me.UnformattedText.Replace("/start", "");
+                    me.UnformattedText = me.UnformattedText.Replace(SINGN_OUT, "");
+                    me.UnformattedText = me.UnformattedText.Replace(SHOW_INFO, "");
                 }
                 _rep.Save(_group);
 
-                var helloMessage = @"sup, %юзернейм%,";
-                switch (me.ParticipantStatus)
+                if (_group.Status == Status.drawn || _group.Status == Status.instructionsSent)
                 {
-                    case ParticipantStatus.init:
-                        helloMessage = HELLO_INIT;
-                        break;
-                    case ParticipantStatus.progress:
-                        helloMessage = HELLO_PROGRESS;
-                        break;
-                    case ParticipantStatus.cleared:
-                        helloMessage = HELLO_CLEARED;
-                        break;
-                    case ParticipantStatus.confirmed:
-                        helloMessage = $"{HELLO_CONFIRMED} >> {me.UnformattedText} <<";
-                        break;
-                    case ParticipantStatus.cancelled:
-                        helloMessage = HELLO_CANCELLED;
-                        break;
+                    //helloMessage = "Ждем подарков :3";
                 }
+                else
+                {
+                    switch (me.ParticipantStatus)
+                    {
+                        case ParticipantStatus.init:
+                            helloMessage = HELLO_INIT;
+                            break;
+                        case ParticipantStatus.progress:
+                            helloMessage = HELLO_PROGRESS;
+                            break;
+                        case ParticipantStatus.cleared:
+                            helloMessage = HELLO_CLEARED;
+                            break;
+                        case ParticipantStatus.confirmed:
+                            helloMessage = $"{HELLO_CONFIRMED} >> {me.UnformattedText} <<";
+                            break;
+                        case ParticipantStatus.cancelled:
+                            helloMessage = HELLO_CANCELLED;
+                            break;
+                    }
+
+                }
+
 
 
                 var buttonOptions = new List<string>() {
@@ -196,6 +266,22 @@ namespace SecretSanta.Helper
                     SINGN_OUT,
                     SHOW_INFO
                 };
+
+                if (_group.Status >= Status.registrationClosed)
+                {
+                    buttonOptions = new List<string>() {
+                    SHOW_INFO
+                };
+                }
+                if (_group.Status == Status.instructionsSent)
+                {
+                    buttonOptions = new List<string>() {
+                    SHOW_INFO,
+                    MESSAGE_MY_RECEIPIENT,
+                    MESSAGE_MY_SANTA
+                };
+                }
+
 
                 if (_group.Admin == null || _group.Admin.UserId == default(long))
                 {
@@ -214,6 +300,8 @@ namespace SecretSanta.Helper
                         CLEAR_INFO,
                         SINGN_OUT,
                         SHOW_INFO,
+                         MESSAGE_MY_RECEIPIENT,
+                    MESSAGE_MY_SANTA,
                         ADMIN_SHOW_NOT_FILLED_ADDRESS,
                         ADMIN_TRIGGERMATCHING,
                         ADMIN_SEND_MATCHED_NOTIFICATION,
@@ -223,6 +311,63 @@ namespace SecretSanta.Helper
                 AskButton(message.Chat.Id, helloMessage, buttonOptions);
             }
         }
+
+        private void MatchSantasAndFindPairs()
+        {
+            _group.Status = Status.registrationClosed;
+            _rep.Save(_group);
+            var matchedPairs = _assigner.TriggerMatching(_group.Id);
+            _logger.LogDebug("matched pairs for debug: @{matchedPairs}", matchedPairs);
+            _group = _rep.ReadAll().FirstOrDefault(x => x.GroupName == "it-chat-nrw-test");
+            _group.Status = Status.drawn;
+            _rep.Save(_group);
+            var buttonOptions = new List<string>() {
+                    SHOW_INFO };
+
+            foreach (var participant in _group.Participants.Where(x => x.ParticipantStatus == ParticipantStatus.cancelled && String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7))
+            {
+                AskButton(participant.UserId, "Секретный санта перемешивает шляпу", buttonOptions);
+            }
+
+
+        }
+
+        private async Task SendMatchingNotificationsAsync()
+        {
+
+            foreach (var participant in _group.Participants)
+            {
+                try
+                {
+                    long myChatId = participant.UserId;
+                    var receivingUser = _group.Participants.FirstOrDefault(x => x.SantaMatching.ReceivingFromId == participant.Id);
+                    var receivingUserChat = await _botClient.GetChatAsync(receivingUser.UserId);
+
+                    var name = $"{receivingUser.AccountName} ({receivingUserChat.FirstName} {receivingUserChat.LastName})";
+                    await _botClient.SendTextMessageAsync(
+                       myChatId,
+                       $"Глубокий ИскусственныйИннокентий посовещался и решил что твой внучок на этот год с никнемом {name}, не пиши ему сам, позже тут появится функция связаться с ним анонимно чтобы например уточнить адрес или договориться о передаче лично");
+                    await _botClient.SendTextMessageAsync(
+                        myChatId,
+                        $"Хей, секретный санта! Вот что написал тебе твой внучок: >> {receivingUser.UnformattedText} <<");
+
+                    participant.InternalStatusUpdates = 1;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Exception while sending infos to agents {ex}", ex);
+                    var admin = _group.Admin;
+                    await _botClient.SendTextMessageAsync(
+                       admin.UserId,
+                       $"Хей, тут сломалось у пользователя {participant.AccountName} при отсылке инфы о внучке >> {ex.Message} <<");
+                }
+            }
+            _group.Status = Status.instructionsSent;
+            _rep.Save(_group);
+        }
+
+
+
 
         /// <summary>
         /// Sends buttons with given text opions
@@ -249,10 +394,13 @@ namespace SecretSanta.Helper
             }
             await _botClient.SendTextMessageAsync(chatId, qustionText,
                 replyMarkup: keyboard);
+
+           
+
         }
 
         //TODO: admin create a room and get an id  (random set of nouns?)
-         
+
         //TODO: admin triggering the assignment
 
         //TODO: participant: join an existing group by id

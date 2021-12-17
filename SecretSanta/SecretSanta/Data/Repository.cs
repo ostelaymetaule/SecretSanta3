@@ -71,7 +71,7 @@ namespace SecretSanta.Data
         /// </summary>
         /// <param name="chatId">telegram intern chatId</param>
         /// <returns>First appearence of the chatGroup object with a given chatId</returns>
-        public ChatGroup GetById(long chatId)
+        public ChatGroup GetByChatId(long chatId)
         {
             using (var db = new LiteDatabase(_dbFilePath))
             {
@@ -79,7 +79,33 @@ namespace SecretSanta.Data
                 return chatGroupCollection.Query().Where(x => x.ChatId == chatId).Select(x => x).FirstOrDefault();
             }
         }
+        /// <summary>
+        /// Returns a single chatGroup by groupId
+        /// </summary>
+        /// <param name="groupId">guid</param>
+        /// <returns>First appearence of the chatGroup object with a given chatId</returns>
+        public ChatGroup GetByGroupId(Guid groupId)
+        {
+            using (var db = new LiteDatabase(_dbFilePath))
+            {
+                var chatGroupCollection = db.GetCollection<ChatGroup>("chatgroup");
+                return chatGroupCollection.Query().Where(x => x.Id == groupId).Select(x => x).FirstOrDefault();
+            }
+        }
 
+        /// <summary>
+        /// Returns a single chatGroup by Name
+        /// </summary>
+        /// <param name="groupName">guid</param>
+        /// <returns>First appearence of the chatGroup object with a given chatId</returns>
+        public ChatGroup GetByGroupName(string groupName)
+        {
+            using (var db = new LiteDatabase(_dbFilePath))
+            {
+                var chatGroupCollection = db.GetCollection<ChatGroup>("chatgroup");
+                return chatGroupCollection.Query().Where(x => x.GroupName == groupName).Select(x => x).FirstOrDefault();
+            }
+        }
 
     }
 }
