@@ -119,115 +119,115 @@ namespace SecretSanta.Helper
                     try
                     {
 
-                   
-
-                    switch (message.Text)
-                    {
-                        case CONFIRM_ADDRESS:
-                            me.ParticipantStatus = ParticipantStatus.confirmed;
-                            break;
-                        case CLEAR_INFO:
-                            me.UnformattedText = "";
-                            me.ParticipantStatus = ParticipantStatus.cleared;
-                            break;
-                        case SHOW_INFO:
-                            await _botClient.SendTextMessageAsync(
-                    message.Chat,
-                    $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<");
-                            me.ParticipantStatus = ParticipantStatus.progress;
-                            break;
-                        case SINGN_OUT:
-                            me.UnformattedText = "";
-                            me.ParticipantStatus = ParticipantStatus.cancelled;
-                            break;
-                        case MESSAGE_MY_RECEIPIENT:
-                            
-                            helloMessage = TELL_ME_WHAT_TO_SEND_TO_RECEIPIENT;
-                            //todo
-                            break;
-                        case MESSAGE_MY_SANTA:
-
-                            helloMessage = TELL_ME_WHAT_TO_SEND_TO_SANTA;
-                            //todo
-                            break;
 
 
-                        case ADMIN_SHOW_NOT_FILLED_ADDRESS:
-
-                            foreach (var participant in _group.Participants)
-                            {
-                                participant.UnformattedText = participant.UnformattedText.Replace("/start", "");
-                                participant.UnformattedText = participant.UnformattedText.Replace(SINGN_OUT, "");
-                                participant.UnformattedText = participant.UnformattedText.Replace(SHOW_INFO, "");
-                            }
-
-                            int numberOfUsers = _group.Participants.Count;
-                            int numberOfUsersInactive = _group.Participants.Where(x => x.ParticipantStatus == ParticipantStatus.cancelled).Count();
-                            int numberOfUsersWithoutAddress = _group.Participants.Where(x => String.IsNullOrWhiteSpace(x.UnformattedText) || x.UnformattedText.Length < 7).Count();
-
-                            await _botClient.SendTextMessageAsync(
-                               message.Chat,
-                               $"UsersWithoutAddress: {numberOfUsersWithoutAddress}/{numberOfUsers}, InactiveUsers: {numberOfUsersInactive}/{numberOfUsers}");
-
-                            break;
-                        case ADMIN_TRIGGERMATCHING:
-                            MatchSantasAndFindPairs();
-                            //TODO: trigger the match
-                            break;
-                        case ADMIN_SEND_MATCHED_NOTIFICATION:
-                            SendMatchingNotificationsAsync();
-                            //TODO: tell users about the santas
-                            break;
-                        case BECOME_GROUP_ADMIN:
-                            _group.Admin = me;
-                            await _botClient.SendTextMessageAsync(
-                    message.Chat,
-                    $"NOW YOU ARE THE ADMIN");
-                            break;
-                        case ADMIN_RESIGN_ADMIN:
-                            _group.Admin = null;
-                            await _botClient.SendTextMessageAsync(
-                    message.Chat,
-                    $"NOW YOU ARE NOW NO LONGER THE ADMIN OF THE GROUP " + _group.GroupName);
-                            break;
-                        //TODO: anonymous conversation
-
-                        default:
-
-                            if (me.LastMessage == MESSAGE_MY_RECEIPIENT)
-                            {
-                                //long myChatId = me.UserId;
-                                var receivingUser = _group.Participants.FirstOrDefault(x => x.Id == me.SantaMatching.SendingToId);
-                                var receivingUserChat = await _botClient.GetChatAsync(receivingUser.UserId);
-
-                                  helloMessage = @"Передал внучку";
-
+                        switch (message.Text)
+                        {
+                            case CONFIRM_ADDRESS:
+                                me.ParticipantStatus = ParticipantStatus.confirmed;
+                                break;
+                            case CLEAR_INFO:
+                                me.UnformattedText = "";
+                                me.ParticipantStatus = ParticipantStatus.cleared;
+                                break;
+                            case SHOW_INFO:
                                 await _botClient.SendTextMessageAsync(
-                                receivingUserChat.Id,
-                                $"Твой санта просил передать: {message.Text}");
-                            }
-                            else if (me.LastMessage == MESSAGE_MY_SANTA)
-                            {
-                                var mySantaUser = _group.Participants.FirstOrDefault(x => x.Id == me.SantaMatching.ReceivingFromId);
-                                var mySantaUserChat = await _botClient.GetChatAsync(mySantaUser.UserId);
-                                helloMessage = @"Передал санте";
-
-
-                                await _botClient.SendTextMessageAsync(
-                                mySantaUserChat.Id,
-                                $"Твой внучок просил передать: {message.Text}");
-                            }
-                            else if (me.ParticipantStatus < ParticipantStatus.confirmed)
-                            {
-
-                                me.UnformattedText = me.UnformattedText + " \n " + message.Text;
-
-
+                        message.Chat,
+                        $"Вот что я отошлю твоему тайному санте: >> {me.UnformattedText} <<");
                                 me.ParticipantStatus = ParticipantStatus.progress;
-                            }
+                                break;
+                            case SINGN_OUT:
+                                me.UnformattedText = "";
+                                me.ParticipantStatus = ParticipantStatus.cancelled;
+                                break;
+                            case MESSAGE_MY_RECEIPIENT:
 
-                            break;
-                    }
+                                helloMessage = TELL_ME_WHAT_TO_SEND_TO_RECEIPIENT;
+                                //todo
+                                break;
+                            case MESSAGE_MY_SANTA:
+
+                                helloMessage = TELL_ME_WHAT_TO_SEND_TO_SANTA;
+                                //todo
+                                break;
+
+
+                            case ADMIN_SHOW_NOT_FILLED_ADDRESS:
+
+                                foreach (var participant in _group.Participants)
+                                {
+                                    participant.UnformattedText = participant.UnformattedText?.Replace("/start", "") ?? "";
+                                    participant.UnformattedText = participant.UnformattedText?.Replace(SINGN_OUT, "") ?? "";
+                                    participant.UnformattedText = participant.UnformattedText?.Replace(SHOW_INFO, "") ?? "";
+                                }
+
+                                int numberOfUsers = _group.Participants.Count;
+                                int numberOfUsersInactive = _group.Participants.Count(x => x.ParticipantStatus == ParticipantStatus.cancelled);
+                                int numberOfUsersWithoutAddress = _group.Participants.Count(x => String.IsNullOrWhiteSpace(x.UnformattedText) || x.UnformattedText.Length < 7);
+
+                                await _botClient.SendTextMessageAsync(
+                                   message.Chat,
+                                   $"UsersWithoutAddress: {numberOfUsersWithoutAddress}/{numberOfUsers}, InactiveUsers: {numberOfUsersInactive}/{numberOfUsers}");
+
+                                break;
+                            case ADMIN_TRIGGERMATCHING:
+                                MatchSantasAndFindPairs();
+                                //TODO: trigger the match
+                                break;
+                            case ADMIN_SEND_MATCHED_NOTIFICATION:
+                                SendMatchingNotificationsAsync();
+                                //TODO: tell users about the santas
+                                break;
+                            case BECOME_GROUP_ADMIN:
+                                _group.Admin = me;
+                                await _botClient.SendTextMessageAsync(
+                        message.Chat,
+                        $"NOW YOU ARE THE ADMIN");
+                                break;
+                            case ADMIN_RESIGN_ADMIN:
+                                _group.Admin = null;
+                                await _botClient.SendTextMessageAsync(
+                        message.Chat,
+                        $"NOW YOU ARE NOW NO LONGER THE ADMIN OF THE GROUP " + _group.GroupName);
+                                break;
+                            //TODO: anonymous conversation
+
+                            default:
+
+                                if (me.LastMessage == MESSAGE_MY_RECEIPIENT)
+                                {
+                                    //long myChatId = me.UserId;
+                                    var receivingUser = _group.Participants.FirstOrDefault(x => x.Id == me.SantaMatching.SendingToId);
+                                    var receivingUserChat = await _botClient.GetChatAsync(receivingUser.UserId);
+
+                                    helloMessage = @"Передал внучку";
+
+                                    await _botClient.SendTextMessageAsync(
+                                    receivingUserChat.Id,
+                                    $"Твой санта просил передать: {message.Text}");
+                                }
+                                else if (me.LastMessage == MESSAGE_MY_SANTA)
+                                {
+                                    var mySantaUser = _group.Participants.FirstOrDefault(x => x.Id == me.SantaMatching.ReceivingFromId);
+                                    var mySantaUserChat = await _botClient.GetChatAsync(mySantaUser.UserId);
+                                    helloMessage = @"Передал санте";
+
+
+                                    await _botClient.SendTextMessageAsync(
+                                    mySantaUserChat.Id,
+                                    $"Твой внучок просил передать: {message.Text}");
+                                }
+                                else if (me.ParticipantStatus < ParticipantStatus.confirmed)
+                                {
+
+                                    me.UnformattedText = me.UnformattedText + " \n " + message.Text;
+
+
+                                    me.ParticipantStatus = ParticipantStatus.progress;
+                                }
+
+                                break;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -236,7 +236,7 @@ namespace SecretSanta.Helper
                         var admin = _group.Admin;
                         await _botClient.SendTextMessageAsync(
                            admin.UserId,
-                           $"Хей, тут сломалось у пользователя {me.AccountName} при приеме сообщения >> {ex.Message} <<");
+                           $"Хей, тут сломалось у пользователя {me.AccountName} при приеме сообщения >> {ex.Message}, {ex.StackTrace} <<");
                     }
                     me.LastMessage = message.Text;
                     me.UnformattedText = me.UnformattedText.Replace("/start", "");
@@ -409,7 +409,7 @@ namespace SecretSanta.Helper
             await _botClient.SendTextMessageAsync(chatId, qustionText,
                 replyMarkup: keyboard);
 
-           
+
 
         }
 
