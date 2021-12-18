@@ -2,26 +2,26 @@ Secret santa bot
 
 Telegram api:
     ✔ di setup @done(21-10-05 22:02)
-    ☐ main bot loop
-    ☐ registering for the secret santa
-    ☐ creating "rooms" for different chats and groups
-    ☐ creating a feedback channel
-    ☐ allow anonimous communication between user pairs
-    ☐ create geo-tags for sending preferences like "only country x" or "worldwide" for better pairings 
-    ☐ create command console for admin
+    ✔ main bot loop @done(21-12-18 01:16)
+    ✔ registering for the secret santa @done(21-12-18 01:16)
+    ✘ creating "rooms" for different chats and groups @cancelled(21-12-18 01:16)
+    ✘ creating a feedback channel @cancelled(21-12-18 01:16)
+    ✔ allow anonimous communication between user pairs @done(21-12-18 01:16)
+    ✘ create geo-tags for sending preferences like "only country x" or "worldwide" for better pairings @cancelled(21-12-18 01:16)
+    ✔ create command console for admin @done(21-12-18 01:16)
     ☐ allow admin per group from resending notifications?
     data storage:
         ✔ decide what to use to store things locally @done(21-10-25 21:57)
         ✔ create persistant repository @done(21-10-25 21:58)
-        ☐ keep the data between container restarts
+        ✔ keep the data between container restarts @done(21-12-18 01:16)
 
 Ops:
     ✔ setup ci/cd pipiline with github actions @done(21-10-05 22:02)
     logging:
         ☐ logging exceptions to a private chat
-        ☐ downloading log dumps via command
+        ✘ downloading log dumps via command @cancelled(21-12-18 01:16)
     create telegram bot:
-        ☐ prod bot
-        ☐ test bot
-        ☐ environment variables for bot secrets
+        ✔ prod bot @done(21-12-18 01:16)
+        ✔ test bot @done(21-12-18 01:16)
+        ✔ environment variables for bot secrets @done(21-12-18 01:16)
 
