@@ -175,11 +175,11 @@ namespace SecretSanta.Helper
                                 break;
                             case ADMIN_TRIGGERMATCHING:
                                 MatchSantasAndFindPairs();
-                                //TODO: trigger the match
+                                 
                                 break;
                             case ADMIN_SEND_MATCHED_NOTIFICATION:
                                 SendMatchingNotificationsAsync();
-                                //TODO: tell users about the santas
+                                
                                 break;
                             case BECOME_GROUP_ADMIN:
                                 _group.Admin = me;
@@ -193,7 +193,7 @@ namespace SecretSanta.Helper
                         message.Chat,
                         $"NOW YOU ARE NOW NO LONGER THE ADMIN OF THE GROUP " + _group.GroupName);
                                 break;
-                            //TODO: anonymous conversation
+                          
 
                             default:
 
@@ -349,6 +349,10 @@ namespace SecretSanta.Helper
 
         }
 
+        private async Task SendEveryoneNotificationsAsync()
+        {
+            //TODO
+        }
         private async Task SendMatchingNotificationsAsync()
         {
             var filledUsers = _group.Participants.Where(x => x.ParticipantStatus != ParticipantStatus.cancelled && !String.IsNullOrWhiteSpace(x.UnformattedText) && x.UnformattedText.Length > 7);
@@ -415,15 +419,7 @@ namespace SecretSanta.Helper
 
 
         }
-
-        //TODO: admin create a room and get an id  (random set of nouns?)
-
-        //TODO: admin triggering the assignment
-
-        //TODO: participant: join an existing group by id
-        //TODO: greetings and 
-        //TODO: anonym communication via bot 
-
+ 
 
     }
 }
